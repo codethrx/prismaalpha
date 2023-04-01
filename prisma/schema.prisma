@@ -1,16 +1,50 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
+//one data source is present
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+//Relations
+//-one to many
+//- many to many
+// -one to one
+
+//field type modifiers ? or []
 model User {
+  id             String @id @default(cuid())
+  email          String @unique
+  age            String
+  role           Role   @default(Basic)
+  writtenPosts   Post[] @relation("WrittenPosts")
+  favouritePosts Post[] @relation("FavPosts")
+  //block level attributes
+  //@@unique([age,email])
+  //@@index([id])
+  // @@id/
+}
+
+enum Role {
+  Basic
+  Admin
+}
+
+model Post {
+  id            String     @id @default(cuid())
+  title         String
+  user          User       @relation("WrittenPosts", fields: [userId], references: [id])
+  userId        String
+  favouriteUser User?      @relation("FavPosts", fields: [favId], references: [id])
+  favId         String?
+  //many to many
+  categories    Category[]
+}
+
+model Category {
   id    String @id @default(cuid())
-  email String
+  //many to many
+  posts Post[]
 }
